@@ -1,155 +1,41 @@
 import './App.css';
-import { useQuery, gql } from '@apollo/client';
-import Card, { PublicImageAssetProps } from './components/Card';
+import { useQuery } from '@apollo/client';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Card, { ProductProps } from './components/Card';
+import ProductDetail from './components/ProductDetail';
+import { QUERIES, fetchImageUrl } from './services/api';
 
-const MY_QUERY = gql`
-query {
-  PublicImageAsset(orderBy: { DateModified: DESC }, limit: 18) {
-    items {
-      Id
-      Title
-      AltText
-      DateCreated
-      DateModified
-      ExpiryDate
-      FolderGuids
-      Height
-      LibraryPath
-      MimeType
-      ParentFolderGuid
-      Url
-      Width
-      Fields {
-        Name
-        Id
-        Type
-        Values
-        ... on CheckboxField {
-          Id
-          Name
-          Type
-          Values
-        }
-        ... on CurrencyField {
-          Id
-          Name
-          Type
-          Values
-        }
-        ... on DateField {
-          Id
-          Name
-          Type
-          Values
-        }
-        ... on DropdownField {
-          Id
-          IsMultiSelect
-          Name
-          Type
-          Values
-        }
-        ... on ImageField {
-          Id
-          Name
-          Type
-          Values
-        }
-        ... on LabelField {
-          Id
-          IsMultiSelect
-          Name
-          Type
-          Values
-        }
-        ... on NumberField {
-          Id
-          Name
-          Type
-          Values
-          DecimalPlaces
-          HasThousandSeparator
-        }
-        ... on PercentField {
-          Id
-          Name
-          Type
-          Values
-          DecimalPlaces
-        }
-        ... on RadioField {
-          Id
-          Name
-          Values
-          Choices {
-            Id
-            Name
-          }
-        }
-        ... on RichTextField {
-          Id
-          Name
-          Type
-          Values
-        }
-        ... on TextAreaField {
-          Id
-          Name
-          Type
-          Values
-        }
-        ... on TextField {
-          Id
-          Name
-          Type
-          Values
-        }
-        ... on VideoField {
-          Id
-          Name
-          Type
-          Values
-        }
-      }
-      Renditions {
-        Height
-        Name
-        Url
-        Width
-      }
-    }
-  }
-}
-`;
+
 function App() {
-  const { loading, error, data } = useQuery(MY_QUERY);
-  if (loading) return <p>Loading... </p>;
-  if (error) return <p>Error: {error.message} </p>;
+  const { loading, error, data } = useQuery(QUERIES.GET_ALL_PRODUCTS);
+  if (loading) return <p>Loading Prod...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+
   return (
-    <div className="container mx-auto p-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {data.PublicImageAsset.items.map((item: PublicImageAssetProps) => (
-          <Card
-            key={item.Id}
-            Id={item.Id}
-            Title={item.Title}
-            AltText={item.AltText}
-            DateCreated={item.DateCreated}
-            DateModified={item.DateModified}
-            ExpiryDate={item.ExpiryDate}
-            FolderGuids={item.FolderGuids}
-            Height={item.Height}
-            LibraryPath={item.LibraryPath}
-            MimeType={item.MimeType}
-            ParentFolderGuid={item.ParentFolderGuid}
-            Url={item.Url}
-            Width={item.Width}
-            Fields={item.Fields}
-            Renditions={item.Renditions}
-          />
-        ))}
-      </div>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={
+          <div className="container mx-auto p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {data.ECProducts_V1.items.map((item: ProductProps) => (
+                <Card
+                  key={item.ContentGuid}
+                  id={item.id}
+                  ContentGuid={item.ContentGuid}
+                  productTitle={item.productTitle}
+                  cover={item.cover}
+                  productDescription={item.productDescription}
+                  publishDate={item.publishDate}
+                  imageUrl={fetchImageUrl(item.cover.assetGuid)}
+                  price={item.price}
+                />
+              ))}
+            </div>
+          </div>
+        } />
+        <Route path="/product/:ContentGuid" element={<ProductDetail />} />
+      </Routes>
+    </Router>
   );
 }
 

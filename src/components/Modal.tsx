@@ -1,45 +1,67 @@
-import React from "react";
-import ResponsiveImage from "./ResponsiveImage";
-
-interface Rendition {
-  Height: number;
-  Width: number;
-  Name: string;
-  Url: string;
-}
+import React, { useEffect } from 'react';
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
-  renditions: Rendition[];
+  children: React.ReactNode;
 }
 
-const Modal: React.FC<ModalProps> = ({
-  isOpen,
-  onClose,
-  title,
-  renditions,
-}) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscapeKey);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto flex items-center justify-center z-50">
-      <div className="relative p-5 border w-full h-full max-w-4xl shadow-lg rounded-md bg-white flex flex-col z-60">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Overlay */}
+      <div 
+        className="absolute inset-0 bg-black bg-opacity-75 transition-opacity"
+        onClick={onClose}
+      />
+      
+      {/* Modal content */}
+      <div className="relative z-50 max-w-screen-xl mx-auto p-4">
+        {/* Close button */}
         <button
-          className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-600 rounded-full p-2 focus:outline-none"
           onClick={onClose}
+          className="absolute top-0 right-0 m-4 text-white hover:text-gray-300 transition-colors"
+          aria-label="Close modal"
         >
-          X
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            className="h-6 w-6" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2} 
+              d="M6 18L18 6M6 6l12 12" 
+            />
+          </svg>
         </button>
-        <div className="flex-grow flex items-center justify-center">
-          <ResponsiveImage
-            images={renditions}
-            alt={title}
-            className="max-w-full max-h-full object-contain"
-          />
-        </div>
-        <div className="text-center mt-4 overflow-hidden overflow-ellipsis whitespace-normal break-words">
-          <h2 className="text-xl font-bold">{title}</h2>
+
+        {/* Content */}
+        <div className="relative">
+          {children}
         </div>
       </div>
     </div>
