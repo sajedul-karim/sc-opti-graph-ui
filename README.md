@@ -45,7 +45,8 @@ nvm use target_version
    Create a `.env` file in the root of your project and add the following variable:
 
    ```plaintext
-   VITE_CONTENT_GRAPH_AUTH=your_auth_token_here
+   VITE_CG_SC_AUTH=YOUR_SC_AUTH_TOKEN
+   VITE_CG_DAM_AUTH=YOUR_DAM_AUTH_TOKEN
    ```
 
    Replace `your_auth_token_here` with your actual authentication token.
@@ -93,31 +94,28 @@ This will check your code for any linting errors based on the ESLint configurati
 - **tsconfig.json**: TypeScript configuration file.
 - **.eslintrc.cjs**: ESLint configuration file.
 - **tailwind.config.js**: Tailwind CSS configuration file.
-- 
 
-### Sample request:
+### Request sequence
+
+1. Get product list
+2. load product image from DAM
+3. For product details, load product and rendition images from DAM
+
+### Sample request for product list:
 ```bash
-query {
-  CGLibrary_V1(locale: en_US) {
+query MyQuery {
+  ECProducts_V1(orderBy: { id: DESC }) {
     total
     items {
       ContentGuid
-      title
+      id
+      price
+      productDescription
+      productTitle
+      publishDate
       cover {
         assetGuid
         assetType
-      }
-      authors {
-        ContentGuid
-        ... on Author_V1 {
-          name
-          dob
-        }
-      }
-      genres {
-        ... on Genre_V1 {
-          name
-        }
       }
     }
   }
@@ -128,66 +126,99 @@ query {
 ```bash
 {
   "data": {
-    "CGLibrary_V1": {
-      "total": 3,
+    "ECProducts_V1": {
+      "total": 5,
       "items": [
         {
-          "ContentGuid": "52a748d7803c44dea3f736a585c09c8f",
-          "title": "Odyssey",
+          "ContentGuid": "68791e87c1394dbfa10c2608c9c34536",
+          "id": 2,
+          "price": 899,
+          "productDescription": "<p class=\"p1\">The OnePlus 12 redefines speed with the Snapdragon 8 Gen 3 processor, a stunning 6.7-inch AMOLED display with a 120Hz refresh rate, and a powerful triple-camera setup. Experience ultra-fast charging and all-day battery life in a sleek design.</p>",
+          "productTitle": "OnePlus 12",
+          "publishDate": "2024-12-05T10:09:54Z",
           "cover": {
-            "assetGuid": "2bfa24c6b09311efaa56f2fadab6374e",
+            "assetGuid": "9215e94cb2bf11ef8d4d66ce9fd9312f",
             "assetType": "image"
-          },
-          "authors": [
-            {
-              "ContentGuid": "ac9e14af114f4da495978102d448e5a6",
-              "name": "Homar",
-              "dob": null
-            }
-          ],
-          "genres": [
-            {
-              "name": "Epic Poetry"
-            }
-          ]
+          }
         },
         {
-          "ContentGuid": "9f15fb98e7814401bccf581e33c56241",
-          "title": "Iliad",
+          "ContentGuid": "bc7b70289be4464bb9c910b977d19dda",
+          "id": 1,
+          "price": 1199,
+          "productDescription": "<p class=\"p1\">The iPhone 15 Pro features a titanium frame, A17 Pro chip, and a stunning Super Retina XDR display. With an advanced camera system, USB-C compatibility, and powerful performance, it’s designed for professionals and enthusiasts alike.</p>",
+          "productTitle": "iPhone 15 Pro",
+          "publishDate": "2024-12-05T10:09:54Z",
           "cover": {
-            "assetGuid": "2c45c9eeb09311efa65f76e3456da660",
+            "assetGuid": "015e9740b2c011ef8bf8923762cb3fa1",
             "assetType": "image"
-          },
-          "authors": [
-            {
-              "ContentGuid": "7db28dfe44934f65a0705a29d493f0e8",
-              "name": "Homer",
-              "dob": null
-            }
-          ],
-          "genres": [
-            {
-              "name": "Epic Poetry"
-            }
-          ]
-        },
+          }
+        }
+      ]
+    }
+  },
+  "extensions": {
+    "correlationId": "8ed39490b8c2a47b",
+    "cost": 28,
+    "costSummary": [
+      "ECProducts_V1(28) = limit(20) + fields(8)"
+    ]
+  }
+}
+```
+
+### Sample request for image from DAM:
+```bash
+query MyQuery {
+  PublicImageAsset(where: { Id: { eq: "52e0b570b2f811ef94c85eec0cc5c1b0" } }) {
+    items {
+      Id
+      Title
+      Url
+      Renditions {
+        Name
+        Url
+        Height
+        Width
+      }
+    }
+  }
+}
+```
+
+### Sample response:
+```bash
+{
+  "data": {
+    "PublicImageAsset": {
+      "items": [
         {
-          "ContentGuid": "326b610fcd3e48b796999f55a91b6064",
-          "title": "Paradise Lost",
-          "cover": {
-            "assetGuid": "2c410adab09311ef8cd0d6e06e13d2b8",
-            "assetType": "image"
-          },
-          "authors": [
+          "Id": "52e0b570b2f811ef94c85eec0cc5c1b0",
+          "Title": "Image",
+          "Url": "https://files.marketing.cmp.optimizely.com/images/assets/Image/Zz01MmUwYjU3MGIyZjgxMWVmOTRjODVlZWMwY2M1YzFiMA==",
+          "Renditions": [
             {
-              "ContentGuid": "ff44f4dda70f4e4cb644b5ec699f6b25",
-              "name": "John Milton",
-              "dob": "2024-12-02T09:56:00Z"
-            }
-          ],
-          "genres": [
+              "Name": "WEBP - Best",
+              "Url": "https://images.cmp.optimizely.com/563fe1aab2f811efa8f21a6c2af46147",
+              "Height": 1024,
+              "Width": 1024
+            },
             {
-              "name": "Epic Poetry"
+              "Name": "JPG",
+              "Url": "https://images.cmp.optimizely.com/564145ccb2f811ef9fb616f3bb100606",
+              "Height": 1024,
+              "Width": 1024
+            },
+            {
+              "Name": "PNG",
+              "Url": "https://images.cmp.optimizely.com/5648a448b2f811efa8f21a6c2af46147",
+              "Height": 1024,
+              "Width": 1024
+            },
+            {
+              "Name": "Low Quality",
+              "Url": "https://images.cmp.optimizely.com/a46be9dab2fa11ef9fb616f3bb100606",
+              "Height": 512,
+              "Width": 512
             }
           ]
         }
@@ -195,10 +226,10 @@ query {
     }
   },
   "extensions": {
-    "correlationId": "8ebab11be9eba48e",
-    "cost": 28,
+    "correlationId": "8ed3cfd1ed93a475",
+    "cost": 29,
     "costSummary": [
-      "CGLibrary_V1(28) = limit(20) + fields(8)"
+      "PublicImageAsset(29) = limit(20) + fields(7) + basicFilter(1)*2"
     ]
   }
 }
