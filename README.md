@@ -1,5 +1,8 @@
 
 ## Demo
+
+LIVE DEMO: https://sc-opti-graph-ui.vercel.app/
+
 ![Screenshot 2024-12-05 at 6 05 19 PM](https://github.com/user-attachments/assets/bd2de7e0-de28-4613-aa72-497116deff4d)
 
 ![Screenshot 2024-12-05 at 6 05 35 PM](https://github.com/user-attachments/assets/ac7cd8d8-5d4b-47e5-920d-789fdbf2dfb2)
@@ -27,7 +30,7 @@ This project is a starter template for building applications using React, TypeSc
 Ensure you have Node.js and Yarn installed on your machine. It's recommended to use `nvm` (Node Version Manager) to manage your Node.js versions. You can select the appropriate Node.js version with:
 
 ```bash
-nvm use target_version
+nvm use <target_version>
 ```
 
 ### Installation
@@ -55,12 +58,12 @@ nvm use target_version
    Create a `.env` file in the root of your project and add the following variable:
 
    ```plaintext
-   VITE_CG_SC_AUTH=YOUR_SC_AUTH_TOKEN
-   VITE_CG_DAM_AUTH=YOUR_DAM_AUTH_TOKEN
+   VITE_CG_SC_AUTH=<YOUR_SC_AUTH_TOKEN>
+   VITE_CG_DAM_AUTH=<YOUR_DAM_AUTH_TOKEN>
    ```
 
    Replace `your_auth_token_here` with your actual authentication token.
-   If you visit https://cmp.optimizely.com/cloud/settings/organization and click the "Misc." tab, then scroll down there is a Optimizely Graph Settings section at the bottom. The "Structured Content" section has an app & secret key and a GraphiQL URL. From GraphiQL URL you will get the auth.
+   If you visit https://cmp.optimizely.com/cloud/settings/organization and click the "Misc." tab, then scroll down there is a Optimizely Graph Settings section at the bottom. The "Structured Content" section has an app & secret key and a GraphiQL URL. From GraphiQL URL you will get the auth. You can also get the dam auth token from the same page.
 
 ### Running the Development Server
 
